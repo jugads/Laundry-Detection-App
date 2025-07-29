@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home Washer Status</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f5f5f5;
+      padding-top: 50px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .status {
+      font-size: 1.5rem;
+      font-weight: bold;
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      display: inline-block;
+      margin: 20px auto;
+    }
+
+    .running {
+      background-color: #e74c3c;
+      color: white;
+    }
+
+    .idle {
+      background-color: #2ecc71;
+      color: white;
+    }
+
+    .updated {
+      font-size: 0.9rem;
+      color: #555;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Home Washer Status</h1>
+  <div id="status" class="status">Loading...</div>
+  <div id="updated" class="updated">Last updated: --</div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCWjwKjtO7Pz4ZCexNmjlL7EfMiLn6aIZ4",
+      authDomain: "laundry-app-276d9.firebaseapp.com",
+      projectId: "laundry-app-276d9",
+      storageBucket: "laundry-app-276d9.appspot.com",
+      messagingSenderId: "189497284021",
+      appId: "1:189497284021:web:ac8e8cf9fd2ff47d23b5fc",
+      measurementId: "G-GP6WJKDLEN"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const statusDiv = document.getElementById("status");
+    const updatedDiv = document.getElementById("updated");
+
+    const docRef = doc(db, "washers", "home-washer");
+
+    onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const status = data.status;
+        const updatedAt = data.updatedAt?.toDate?.() || new Date();
+
+        statusDiv.textContent = `Washer is ${status.toUpperCase()}`;
+        statusDiv.className = `status ${status}`;
+
+        const formattedTime = new Date(updatedAt).toLocaleTimeString([], {
+          hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+        updatedDiv.textContent = `Last updated: ${formattedTime}`;
+      } else {
+        statusDiv.textContent = "Document not found";
+        statusDiv.className = "status";
+      }
+    });
+  </script>
+</body>
+</html>
